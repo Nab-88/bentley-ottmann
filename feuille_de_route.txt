@@ -1,0 +1,13 @@
+---------FEUILLE DE ROUTE DU PROJET D'ALGO--------
+
+Ce fichier servira de ligne directrice tout au long du projet.
+
+Il sera en quelque sort le Cahier des Charges du projet:
+
+---- Etape 1 : Comprendre et analyser le problème -----
+
+---- Etape 2 : Détailler tout ce qu'il y a a faire avant de commencer à coder ---
+
+---- Etape 3 : Coder chaque fonction défini à l'étape 2 -----
+
+---- Etape 4 : Phase de test pour vérifier que tout fonctionne comme prévu ----
