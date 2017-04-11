@@ -32,6 +32,12 @@ def getY(item):
     """
     return(item.coordinates[1])
 
+def getX(item):
+    """
+    fonction utilisé pour récupérer le X du point pour la fonction sorted()
+    """
+    return(item.coordinates[0])
+
 def create_event(liste_des_segments):
     """
     ENTRÉE : Une liste de segment de la forme [Segment(Point1, Point2), ...., Segment(Point1, Point2)]
@@ -47,13 +53,32 @@ def create_event(liste_des_segments):
     # on vient de trier la liste en fonction des Y croissants
     # mais il reste encore a trier la liste pour un meme Y
     # avoir comment on le fait.
-    return(liste_event_triee)
+    liste_vraiment_triee = []
+    ##on va mettre dans cette liste la liste triée par Y croissant, puis pour des mêmes
+    ##Y par x croissant
+    a = []
+    a.append(liste_event_triee[0])
+    for p in liste_event_triee:
+        if getY(p) == getY(a[0]):
+            a.append(p)
+            ## on rassemble au sein d'une meme liste les points avec le meme Y
+        elif getY(p) != getY(a[0]):
+            ## si les points n'ont plus le même Y
+            b = sorted(a, key=getX)
+            ## on classe la sous_liste de même Y en fonction de leur X croissant
+            for point in b:
+                liste_vraiment_triee.append(point)
+            ## on ajoute cette sous-liste a la liste vraiment triée
+            a = [p]
+            ## on recomence une nouvelle sous-liste de point de meme Y
 
 
+    return(liste_vraiment_triee)
 
-
-
-
+def search_voisin():
+    """
+    Pour chaque point
+    """
 
 def main():
     """
