@@ -27,11 +27,11 @@ def test(filename):
     # plusieurs segments, il compte plusieurs fois) est", ...)
 
 
-def getY(item):
+def getYandX(item):
     """
     fonction utilisé pour récupérer le Y du point pour la fonction sorted()
     """
-    return(item.coordinates[1])
+    return(item.coordinates[1], item.coordinates[0])
 
 def getX(item):
     """
@@ -90,7 +90,7 @@ def creation_evenement(liste_segment):
         liste_des_points.append(s.endpoints[0])
         s.endpoints[1].type = "fin"
         liste_des_points.append(s.endpoints[1])
-    liste_event_tries = SortedListWithKey(liste_des_points, key=getY)
+    liste_event_tries = SortedListWithKey(liste_des_points, key=getYandX)
     return(liste_event_tries)
 
 def detecter_voisin():
@@ -101,24 +101,48 @@ def detecter_voisin():
     #TODO
 
 
-def chercher_intersections(segment, liste_evenements):
+def chercher_intersections(segment, liste_evenements, liste_vivants):
     """
-    ENTREE: un segment
+    ENTREE: un segment, liste_evenements,
     SORTIE: les intersections entre le segment en entrée et ses deux plus proches voisins
     et si il y en a, on les ajoute à la liste des evenements, et à segment.intersection
     """
-    #TODO
+    index_du_segment = liste_vivants.index(segment)
+    #Rajouter des tests pour pas avoir un index list out of range
+    voisin_gauche = liste_vivants[index-1]
+    voisin_droite = liste_vivants[index+1]
+    ##
+    intersection_gauche = segment.intersection_with(voisin_gauche)
+    liste_evenements.add(intersection_gauche)
+    segment.intersections.append(intersection_gauche)
+    voisin_gauche.intersections.append(intersection_gauche)
+    ##
+    intersection_droite = segment.intersection_with(voisin_droite)
+    liste_evenements.add(intersection_droite)
+    segment.intersections.append(intersection_droite)
+    voisin_droite.intersections.append(intersection_droite)
+    ##
+
+
 
 def chercher_intersection_entre_voisin(segment, liste_evenements):
     """
     ENTREE: un segment
-    SORTIE: les intersections entre les deux plus proches voisins du voisins
+    SORTIE: les intersections entre les deux plus proches voisins du segment
     MAIS SANS LUI, car on fait comme si on l'avait enlevé.
     et si il y en a, on les ajoute à la liste des evenements, et à segment.intersection
     """
-    #TODO
+    index_du_segment = liste_vivants.index(segment)
+    #Rajouter des tests pour pas avoir un index list out of range
+    voisin_gauche = liste_vivants[index-1]
+    voisin_droite = liste_vivants[index+1]
+    ##
+    intersection = voisin_gauche.intersection_with(voisin_droite)
+    liste_evenements.add(intersection)
+    voisin_gauche.intersections.append(intersection)
+    voisin_droite.intersections.append(intersection)
 
-    
+
 def est_un_debut(point_actuel):
     """"
     renvoie true si le point_actuel est un début de segment

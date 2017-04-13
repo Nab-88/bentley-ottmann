@@ -31,7 +31,7 @@ class Segment:
         create a segment from an array of two points.
         """
         self.endpoints = points
-        self.intersections = None
+        self.intersections = []
 
     def copy(self):
         """
