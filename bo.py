@@ -82,11 +82,14 @@ def creation_evenement(liste_segment):
     ENTRÉE : Une liste de segment de la forme [Segment(Point1, Point2), ...., Segment(Point1, Point2)]
     SORTIE : Une liste des points triés par "ordre croissant de balayage",
     représentant l'ensemble E des évenements à parcourir.
+    En plus on rajoute le type du point, si c'est un début ou un fin.
     """
     liste_des_points = []
     for s in liste_segment:
-        for p in s:
-            liste_des_points.append(p)
+        s.endpoints[0].type = "debut"
+        liste_des_points.append(s.endpoints[0])
+        s.endpoints[1].type = "fin"
+        liste_des_points.append(s.endpoints[1])
     liste_event_tries = SortedListWithKey(liste_des_points, key=getY)
     return(liste_event_tries)
 
@@ -114,17 +117,25 @@ def chercher_intersection_entre_voisin(segment, liste_evenements):
     et si il y en a, on les ajoute à la liste des evenements, et à segment.intersection
     """
     #TODO
+
+    
 def est_un_debut(point_actuel):
     """"
     renvoie true si le point_actuel est un début de segment
     """"
-    #TODO
+    if point_actuel.type == 'debut':
+        return(True)
+    else:
+        return(False)
 
 def est_une_fin(point_actuel):
     """"
     renvoie true si le point_actuel est une fin de segment
     """"
-    #TODO
+    if point_actuel.type == 'fin':
+        return(True)
+    else:
+        return(False)
 
 def supprimer_evenement_actuel(liste_evenements):
     """"
@@ -145,6 +156,8 @@ def segment_actuels(point_actuel):
     """"
     renvoie la liste des segments dont le point_actuel fait partie
     """"
+    #TODO
+
 
 def bentley_ottman(liste_evenements, liste_segments):
     """"
