@@ -11,6 +11,7 @@ import sys
 from geo.segment import *
 from geo.tycat import *
 from sortedcontainers.sortedlist import *
+from vivant import *
 
 def test(filename):
     """
@@ -18,10 +19,10 @@ def test(filename):
     """
     adjuster, segments = load_segments(filename)
     tycat(segments)
-    #TODO: merci de completer et de decommenter les lignes suivantes
+    #merci de completer et de decommenter les lignes suivantes
     #results = lancer bentley ottmann sur les segments et l'ajusteur
-    #...
-    #tycat(segments, intersections)
+    intersections = bentley_ottman(creation_evenement(segments),segments)
+    tycat(segments, intersections)
     #print("le nombre d'intersections (= le nombre de points differents) est", ...)
     #print("le nombre de coupes dans les segments (si un point d'intersection apparait dans
     # plusieurs segments, il compte plusieurs fois) est", ...)
@@ -101,7 +102,7 @@ def detecter_voisin():
     #TODO
 
 
-def chercher_intersections(segment, liste_evenements, liste_vivants):
+def chercher_intersection(segment, liste_evenements, liste_vivants):
     """
     ENTREE: un segment, liste_evenements,
     SORTIE: les intersections entre le segment en entrée et ses deux plus proches voisins
@@ -125,14 +126,14 @@ def chercher_intersections(segment, liste_evenements, liste_vivants):
 
 
 
-def chercher_intersection_entre_voisin(segment, liste_evenements):
+def chercher_intersection_entre_voisin(segment, liste_evenements, liste_vivants):
     """
     ENTREE: un segment
     SORTIE: les intersections entre les deux plus proches voisins du segment
     MAIS SANS LUI, car on fait comme si on l'avait enlevé.
     et si il y en a, on les ajoute à la liste des evenements, et à segment.intersection
     """
-    index_du_segment = liste_vivants.index(segment)
+    index = liste_vivants.index(segment)
     #Rajouter des tests pour pas avoir un index list out of range
     voisin_gauche = liste_vivants[index-1]
     voisin_droite = liste_vivants[index+1]
@@ -144,18 +145,18 @@ def chercher_intersection_entre_voisin(segment, liste_evenements):
 
 
 def est_un_debut(point_actuel):
-    """"
+    """
     renvoie true si le point_actuel est un début de segment
-    """"
+    """
     if point_actuel.type == 'debut':
-        return(True)
+        return True
     else:
-        return(False)
+        return False
 
 def est_une_fin(point_actuel):
-    """"
+    """
     renvoie true si le point_actuel est une fin de segment
-    """"
+    """
     if point_actuel.type == 'fin':
         return(True)
     else:
@@ -167,27 +168,27 @@ def passer_evenement_suivant(liste_evenements, liste_finale):
     supprime l'évenement actuel (le premier) de la liste des evenements, l'ajoute
     à la liste finale des points traités
     et renvoie le nouveau_premier point de la liste des evenements
-    """"
-    liste_finale = (liste_evenements.pop()
-
+    """
+    liste_finale = liste_evenements.pop()
+    return liste_finale
 
 
 def segment_actuels(point_actuel, liste_de_tous_les_segments):
-    """"
+    """
     renvoie la liste des segments dont le point_actuel fait partie
-    """"
+    """
     segment_actuels = []
-    for segment in liste_de_tous_les_segments:
-        if segment.cointains(point_actuel):
-            segment_actuels.append(segment)
+    for s in liste_de_tous_les_segments:
+        if s.contains(point_actuel):
+            segment_actuels.append(s)
     return segment_actuels
 
 
 def bentley_ottman(liste_evenements, liste_segments):
-    """"
+    """
     Cette fonction implémente l'algorithme de Bentley_ottman
     En entrée la liste des segments et des evenements sont triées
-    """"
+    """
     #-----ATTENTION----
     #Dans la version ci dessous de l'algorithme
     #J'ai décidé d'ajouter et d'enlever à chaque fois tous les segments qui contenaient le point_courant
@@ -196,33 +197,33 @@ def bentley_ottman(liste_evenements, liste_segments):
     liste_finale = []
     #cette liste va contenir tous les points traités
     #et cest cette liste qu'on va retourner et afficher
-    point_courant=liste_evenements[0]
+    point_courant = liste_evenements[0]
     segments_vivants = initialiser_vivants()
-    while len(liste_evenements) !=0:
-        segments_courants = segment_actuels(point_courant)
+    while len(liste_evenements) != 0:
+        segments_courants = segment_actuels(point_courant, liste_segments)
         #liste de tous les segments dont le point_courant fait partie
         if est_un_debut(point_courant):
             #si point est un début de segment
             for segment in segments_courants:
-                ajouter_aux_vivants(segment)
+                ajouter_aux_vivants(segment, segments_vivants)
                 #on ajoute tous les segments du point_courant aux vivants
             for segment in segments_courants:
                 #on reparcourt la liste des segments courant et on compare avec leur voisin
                 #de gauche et droite
                 #on est obligé de de le faire une fois apres les avoir tous ajoutés aux vivants
                 #sinon on risque d'en louper
-                chercher_intersection(segment, liste_evenements)
+                chercher_intersection(segment, liste_evenements, segments_vivants)
                 #on regarde si le segment actuel intersecte avec ses deux plus proches voisins et si
                 #oui on ajoute l'intersection a la liste des evenements
         elif est_une_fin(point_courant):
             #si point est une fin de segment
             for segment in segments_courants:
-                chercher_intersection_entre_voisin(segment)
+                chercher_intersection_entre_voisin(segment, liste_evenements, segments_vivants)
                 #on regarde si il existe des intersections entre les voisins de gauche et droite
                 #du segment qu'on va enlever
-                supprimer_des_vivants(segment)
+                supprimer_des_vivant(segment, segments_vivants)
                 #on enleve tous les segments du point_courant des vivants
-        point_courant = passer_evenement_suivant(liste_des_evenements, liste_finale)
+        point_courant = passer_evenement_suivant(liste_evenements, liste_finale)
     return(liste_finale)
 
 
@@ -237,3 +238,5 @@ def main():
     """
     for filename in sys.argv[1:]:
         test(filename)
+
+main()
