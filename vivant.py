@@ -21,6 +21,7 @@ def key_vivant(segment, point):
     long_line = Segment[point_gauche, point_droit]
     #creation de la ligne permettant de déterminer les x de la clef
     point_intersection = long_line.intersection_with(segment)
+    
     if point_intersection is None:
         x_i, y_i = None, None
         angle = None
@@ -50,5 +51,10 @@ def initialiser_vivants():
     La clé est un tuple (x, angle), et on classe par x croissant et ensuite pour un
     meme x par angle
     """
-    liste_vivants = SortedListWithKey(None, key=key_vivant)
+
     return liste_vivants
+
+#Louis me dit que ma key vivant marche pas car elle ne peut pas prendre 2 arguments
+#il faut donc dans ma classe segment ajouter un attribut key à ma classe semgent en fonction
+# d'un point et de recalculer a chaque nouvel iteration toutes les clefs des segments vivants
+#et ducoup la fonction key vivant prendrai en entrée un segment et retournerai la key (x; alpha)

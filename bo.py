@@ -107,7 +107,7 @@ def chercher_intersections(segment, liste_evenements, liste_vivants):
     SORTIE: les intersections entre le segment en entrée et ses deux plus proches voisins
     et si il y en a, on les ajoute à la liste des evenements, et à segment.intersection
     """
-    index_du_segment = liste_vivants.index(segment)
+    index = liste_vivants.index(segment)
     #Rajouter des tests pour pas avoir un index list out of range
     voisin_gauche = liste_vivants[index-1]
     voisin_droite = liste_vivants[index+1]
@@ -161,11 +161,6 @@ def est_une_fin(point_actuel):
     else:
         return(False)
 
-def supprimer_evenement_actuel(liste_evenements):
-    """"
-
-    """"
-    #TODO
 
 def passer_evenement_suivant(liste_evenements, liste_finale):
     """
@@ -173,14 +168,19 @@ def passer_evenement_suivant(liste_evenements, liste_finale):
     à la liste finale des points traités
     et renvoie le nouveau_premier point de la liste des evenements
     """"
-    #TODO
+    liste_finale = (liste_evenements.pop()
 
 
-def segment_actuels(point_actuel):
+
+def segment_actuels(point_actuel, liste_de_tous_les_segments):
     """"
     renvoie la liste des segments dont le point_actuel fait partie
     """"
-    #TODO
+    segment_actuels = []
+    for segment in liste_de_tous_les_segments:
+        if segment.cointains(point_actuel):
+            segment_actuels.append(segment)
+    return segment_actuels
 
 
 def bentley_ottman(liste_evenements, liste_segments):
@@ -237,6 +237,3 @@ def main():
     """
     for filename in sys.argv[1:]:
         test(filename)
-
-
-main()
