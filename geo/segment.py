@@ -32,6 +32,7 @@ class Segment:
         """
         self.endpoints = points
         self.intersections = []
+        self.key = None
 
     def copy(self):
         """

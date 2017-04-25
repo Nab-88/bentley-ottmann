@@ -94,12 +94,12 @@ def creation_evenement(liste_segment):
     liste_event_tries = SortedListWithKey(liste_des_points, key=getYandX)
     return(liste_event_tries)
 
-def detecter_voisin():
-    """
-    ENTREE: un segment
-    SORTIE: la liste des segments voisins
-    """
-    #TODO
+# def detecter_voisin():
+#     """
+#     ENTREE: un segment
+#     SORTIE: la liste des segments voisins
+#     """
+#     #TODO
 
 
 def chercher_intersection(segment, liste_evenements, liste_vivants):
@@ -112,13 +112,15 @@ def chercher_intersection(segment, liste_evenements, liste_vivants):
     #Rajouter des tests pour pas avoir un index list out of range
     voisin_gauche = liste_vivants[index-1]
     voisin_droite = liste_vivants[index+1]
-    ##
+    ##PENSER À FAIRE PASSER LES DEUX NOUVEAUX POINTS DANS L'AJUSTEUR
     intersection_gauche = segment.intersection_with(voisin_gauche)
+    intersection_gauche.type = "intersection"
     liste_evenements.add(intersection_gauche)
     segment.intersections.append(intersection_gauche)
     voisin_gauche.intersections.append(intersection_gauche)
     ##
     intersection_droite = segment.intersection_with(voisin_droite)
+    intersection_droite.type = "intersection"
     liste_evenements.add(intersection_droite)
     segment.intersections.append(intersection_droite)
     voisin_droite.intersections.append(intersection_droite)
@@ -158,9 +160,9 @@ def est_une_fin(point_actuel):
     renvoie true si le point_actuel est une fin de segment
     """
     if point_actuel.type == 'fin':
-        return(True)
+        return True
     else:
-        return(False)
+        return False
 
 
 def passer_evenement_suivant(liste_evenements, liste_finale):
@@ -199,9 +201,11 @@ def bentley_ottman(liste_evenements, liste_segments):
     #et cest cette liste qu'on va retourner et afficher
     point_courant = liste_evenements[0]
     segments_vivants = initialiser_vivants()
+    liste_intersections = []
     while len(liste_evenements) != 0:
         segments_courants = segment_actuels(point_courant, liste_segments)
         #liste de tous les segments dont le point_courant fait partie
+        mis_a_jour_key(segments_vivants, point_courant)
         if est_un_debut(point_courant):
             #si point est un début de segment
             for segment in segments_courants:
@@ -223,8 +227,8 @@ def bentley_ottman(liste_evenements, liste_segments):
                 #du segment qu'on va enlever
                 supprimer_des_vivant(segment, segments_vivants)
                 #on enleve tous les segments du point_courant des vivants
-        point_courant = passer_evenement_suivant(liste_evenements, liste_finale)
-    return(liste_finale)
+        point_courant = passer_evenement_suivant(liste_evenements, liste_intersections)
+    return(liste_intersections)
 
 
 

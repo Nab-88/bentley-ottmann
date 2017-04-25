@@ -9,6 +9,16 @@ from geo.tycat import *
 from sortedcontainers.sortedlist import *
 from math import atan
 
+def mis_a_jour_key(liste_vivant, point_actuel):
+    """
+    Recalcule toutes les clefs des segments vivants par rapport au
+    nouveau point actuel et met à jour l'attribut .key du segment vivant
+    """
+    for vivant in liste_vivant:
+        key_vivant(vivant, point_actuel)
+
+
+
 def key_vivant(segment, point):
     """
     définition de la clé qui permet de déterminer les segments vivants
@@ -29,6 +39,10 @@ def key_vivant(segment, point):
         x_i, y_i = point_intersection.coordinates[0], point_intersection.coordinates[1]
         x_proj, y_proj = x_i, y
         angle = atan((abs(segment.endpoints[1]-y_proj))/(abs(x_proj-x_i)))
+    x_key = x_i
+    key_actuelle = (x_key, angle)
+    #On met à jour la clé du segment
+    segment.key = key_actuelle
 
 def ajouter_aux_vivants(segment_actuel, liste_vivant):
     """
@@ -43,6 +57,9 @@ def supprimer_des_vivant(segment_actuel, liste_vivant):
     """
     liste_vivant.remove(segment_actuel)
 
+def attribut_key(segment):
+    return segment.key
+
 
 def initialiser_vivants():
     """
@@ -51,8 +68,7 @@ def initialiser_vivants():
     La clé est un tuple (x, angle), et on classe par x croissant et ensuite pour un
     meme x par angle
     """
-    liste_vivant = SortedListWithKey(key=key_vivant())
-
+    liste_vivant = SortedListWithKey(key=attribut_key)
     return liste_vivant
 
 #Louis me dit que ma key vivant marche pas car elle ne peut pas prendre 2 arguments
