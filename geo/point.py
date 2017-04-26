@@ -24,7 +24,9 @@ class Point:
         build new point using an array of coordinates.
         """
         self.coordinates = coordinates
-        self.type = None
+        self.debut = None
+        self.milieu = None
+        self.fin = None
 
     def copy(self):
         """
@@ -67,7 +69,8 @@ class Point:
         """
         strict equality operator
         """
-        return self.coordinates == other.coordinates
+        return (abs(self.coordinates[0] - other.coordinates[0]) < 0.000001)\
+            and (abs(self.coordinates[1] - other.coordinates[1]) < 0.000001)
 
     def __hash__(self):
         return hash(tuple(self.coordinates))

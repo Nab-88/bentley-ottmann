@@ -25,7 +25,7 @@ def creation_vivant(segment, key):
     """
     return Vivant(segment, key)
 
-def mis_a_jour_key(liste_vivant, point_actuel):
+def mise_a_jour_key(liste_vivant, point_actuel):
     """
     Recalcule toutes les clefs des segments vivants par rapport au
     nouveau point actuel et met à jour l'attribut .key du segment vivant

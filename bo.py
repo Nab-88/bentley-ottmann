@@ -143,7 +143,7 @@ def chercher_intersection_entre_voisin(vivant, liste_evenements, liste_vivants, 
         intersection = voisin_gauche.intersection_with(voisin_droite)
 
         if intersection is not None:
-            intersection= adjuster.hash_point(intersection)
+            intersection = adjuster.hash_point(intersection)
             liste_evenements.add(intersection)
             voisin_gauche.intersections.append(intersection)
             voisin_droite.intersections.append(intersection)
@@ -154,7 +154,7 @@ def est_un_debut(point_actuel):
     """
     renvoie true si le point_actuel est un début de segment
     """
-    if point_actuel.type == 'debut':
+    if point_actuel.debut is not None:
         return True
     else:
         return False
@@ -164,7 +164,7 @@ def est_une_fin(point_actuel):
     """
     renvoie true si le point_actuel est une fin de segment
     """
-    if point_actuel.type == 'fin':
+    if point_actuel.fin is not None:
         return True
     else:
         return False
@@ -180,7 +180,7 @@ def passer_evenement_suivant(liste_evenements, liste_finale):
     return liste_finale
 
 
-def segment_actuels(point_actuel, liste_de_tous_les_segments):
+def segment_actuels(point_actuel, liste_de_tous_les_segments, adjuster):
     """
     renvoie la liste des segments dont le point_actuel fait partie
     """
@@ -188,6 +188,12 @@ def segment_actuels(point_actuel, liste_de_tous_les_segments):
     for s in liste_de_tous_les_segments:
         if s.contains(point_actuel):
             segment_actuels.append(s)
+            if point_actuel == s.endpoints[0]:
+                point_actuel.debut.append(s)
+            elif point_actuel == s.endpoints[1]:
+                point_actuel.fin.append(s)
+            else:
+                point_actuel.milieu.append(s)
     return segment_actuels
 
 
