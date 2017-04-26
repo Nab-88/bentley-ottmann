@@ -21,8 +21,8 @@ def test(filename):
     tycat(segments)
     #merci de completer et de decommenter les lignes suivantes
     #results = lancer bentley ottmann sur les segments et l'ajusteur
-    intersections = bentley_ottman(creation_evenement(segments), segments)
-    tycat(segments, intersections)
+    intersections = bentley_ottman(creation_evenement(segments), segments, adjuster)
+    #tycat(segments, intersections)
     #print("le nombre d'intersections (= le nombre de points differents) est", ...)
     #print("le nombre de coupes dans les segments (si un point d'intersection apparait dans
     # plusieurs segments, il compte plusieurs fois) est", ...)
@@ -103,15 +103,13 @@ def creation_evenement(liste_segment):
 #     #TODO
 
 
-def chercher_intersection(vivant, liste_evenements, liste_vivants,liste_intersections):
+def chercher_intersection(vivant, liste_evenements, liste_vivants,liste_intersections, adjuster):
     """
     ENTREE: un segment, liste_evenements,
     SORTIE: les intersections entre le segment en entrée et ses deux plus proches voisins
     et si il y en a, on les ajoute à la liste des evenements, et à segment.intersection
     """
     index = liste_vivants.index(vivant)
-    print('chercher_intersection', index)
-    #Rajouter des tests pour pas avoir un index list out of range
     print('vivant', liste_vivants)
     if index != len(liste_vivants)-1 and index != 0:
         print('111111')
@@ -122,21 +120,19 @@ def chercher_intersection(vivant, liste_evenements, liste_vivants,liste_intersec
         voisin_droite = vivant_droite.segment
         ##PENSER À FAIRE PASSER LES DEUX NOUVEAUX POINTS DANS L'AJUSTEUR
         intersection_gauche = segment.intersection_with(voisin_gauche)
+
         if intersection_gauche is not None:
-            #intersection_gauche.type = "intersection"
-            liste_evenements.add(intersection_gauche)
-            #segment.intersections.append(intersection_gauche)
-            #voisin_gauche.intersections.append(intersection_gauche)
-            ##
-            liste_intersections.append(intersection_gauche)
+            intersection_gauche = adjuster.hash_point(intersection_gauche)
+            if intersection_gauche not in liste_evenements:
+                liste_evenements.add(intersection_gauche)
+                liste_intersections.append(intersection_gauche)
         intersection_droite = segment.intersection_with(voisin_droite)
+
         if intersection_droite is not None:
-            #intersection_droite.type = "intersection"
-            liste_evenements.add(intersection_droite)
-            #segment.intersections.append(intersection_droite)
-            #voisin_droite.intersections.append(intersection_droite)
-            ##
-            liste_intersections.append(intersection_droite)
+            intersection_droite = adjuster.hash_point(intersection_droite)
+            if intersection_droite not in liste_evenements:
+                liste_evenements.add(intersection_droite)
+                liste_intersections.append(intersection_droite)
     elif index == 0 and len(liste_vivants) != 1:
         print('22222')
         vivant_droite = liste_vivants[index+1]
@@ -144,12 +140,15 @@ def chercher_intersection(vivant, liste_evenements, liste_vivants,liste_intersec
         segment = vivant.segment
         voisin_droite = vivant_droite.segment
         intersection_droite = segment.intersection_with(voisin_droite)
+
         if intersection_droite is not None:
+            intersection_droite = adjuster.hash_point(intersection_droite)
             #intersection_droite.type = "intersection"
-            liste_evenements.add(intersection_droite)
+            if intersection_droite not in liste_evenements:
+                liste_evenements.add(intersection_droite)
+                liste_intersections.append(intersection_droite)
             segment.intersections.append(intersection_droite)
             voisin_droite.intersections.append(intersection_droite)
-            liste_intersections.append(intersection_droite)
     elif index == len(liste_vivants)-1 and len(liste_vivants) != 1:
         print('33333')
         vivant_gauche = liste_vivants[index-1]
@@ -157,16 +156,19 @@ def chercher_intersection(vivant, liste_evenements, liste_vivants,liste_intersec
         segment = vivant.segment
         voisin_gauche = vivant_gauche.segment
         intersection_gauche = segment.intersection_with(voisin_gauche)
+
         if intersection_gauche is not None:
-            #intersection_gauche.type = "intersection"
-            liste_evenements.add(intersection_gauche)
+            intersection_gauche = adjuster.hash_point(intersection_gauche)
+            if intersection_gauche not in liste_evenements:
+                liste_evenements.add(intersection_gauche)
+                liste_intersections.append(intersection_gauche)
             segment.intersections.append(intersection_gauche)
             voisin_gauche.intersections.append(intersection_gauche)
-            liste_intersections.append(intersection_gauche)
 
 
 
-def chercher_intersection_entre_voisin(vivant, liste_evenements, liste_vivants, liste_intersections):
+
+def chercher_intersection_entre_voisin(vivant, liste_evenements, liste_vivants, liste_intersections, adjuster):
     """
     ENTREE: un segment
     SORTIE: les intersections entre les deux plus proches voisins du segment
@@ -176,17 +178,20 @@ def chercher_intersection_entre_voisin(vivant, liste_evenements, liste_vivants, 
     index = liste_vivants.index(vivant)
     print('chercher_intersection_entre_voisin')
     #Rajouter des tests pour pas avoir un index list out of range
-    if index != len(liste_vivants)-1 or index != 0:
+    if index != len(liste_vivants)-1 and index != 0:
         vivant_gauche = liste_vivants[index-1]
         vivant_droite = liste_vivants[index+1]
         ##
         voisin_gauche = vivant_gauche.segment
         voisin_droite = vivant_droite.segment
         intersection = voisin_gauche.intersection_with(voisin_droite)
-        liste_evenements.add(intersection)
-        voisin_gauche.intersections.append(intersection)
-        voisin_droite.intersections.append(intersection)
-        liste_intersections.append(intersection)
+
+        if intersection is not None:
+            intersection= adjuster.hash_point(intersection)
+            liste_evenements.add(intersection)
+            voisin_gauche.intersections.append(intersection)
+            voisin_droite.intersections.append(intersection)
+            liste_intersections.append(intersection)
 
 def est_un_debut(point_actuel):
     """
@@ -228,56 +233,47 @@ def segment_actuels(point_actuel, liste_de_tous_les_segments):
     return segment_actuels
 
 
-def bentley_ottman(liste_evenements, liste_segments):
+def bentley_ottman(liste_evenements, liste_segments, adjuster):
     """
     Cette fonction implémente l'algorithme de Bentley_ottman
     En entrée la liste des segments et des evenements sont triées
     """
-    #-----ATTENTION----b t
-    #Dans la version ci dessous de l'algorithme
-    #J'ai décidé d'ajouter et d'enlever à chaque fois tous les segments qui contenaient le point_courant
-    #Il faudrait peut etre ajouter/enlever seulement le (ou les) segment(s) dont cest le debut/ou la fin
-    #A REFLECHIR ...
     liste_intersections = []
-    #cette liste va contenir tous les points traités
-    #et cest cette liste qu'on va retourner et afficher
-    point_courant = liste_evenements[0]
     segments_vivants = initialiser_vivants()
     while len(liste_evenements) != 0:
+        point_courant = liste_evenements[0]
         tycat(liste_segments, point_courant)
         print('=======nouvelle iteration======')
         print('liste_evenement=', liste_evenements)
         print('point_courant actuel', point_courant)
         segments_courants = segment_actuels(point_courant, liste_segments)
-        #liste de tous les segments dont le point_courant fait partie
         mis_a_jour_key(segments_vivants, point_courant)
         if est_un_debut(point_courant):
-            #si point est un début de segment
             for segment in segments_courants:
                 clef = key_vivant(segment, point_courant)
                 vivant = Vivant(segment, clef)
                 ajouter_aux_vivants(vivant, segments_vivants)
-                #on ajoute tous les segments du point_courant aux vivants
             for vivant in segments_vivants:
                 #on reparcourt la liste des segments courant et on compare avec leur voisin
                 #de gauche et droite
                 #on est obligé de de le faire une fois apres les avoir tous ajoutés aux vivants
                 #sinon on risque d'en louper
                 print('liste_evenements', liste_evenements)
-                chercher_intersection(vivant, liste_evenements, segments_vivants,liste_intersections)
+                chercher_intersection(vivant, liste_evenements, segments_vivants,liste_intersections, adjuster)
                 #on regarde si le segment actuel intersecte avec ses deux plus proches voisins et si
                 #oui on ajoute l'intersection a la liste des evenements
         elif est_une_fin(point_courant):
-            #si point est une fin de segment
             #FAUX ! il faut faire un for segment in segments_courants
             #mais je vois pas comment le faire sans que ça bug ... avec ma classe vivant
-            for vivant in segments_vivants:
-                chercher_intersection_entre_voisin(vivant, liste_evenements, segments_vivants, liste_intersections)
+            for segment in segments_courants:
+                for vivant in segments_vivants:
+                    if segment == vivant.segment:
+                        chercher_intersection_entre_voisin(vivant, liste_evenements, segments_vivants, liste_intersections, adjuster)
                 #on regarde si il existe des intersections entre les voisins de gauche et droite
                 #du segment qu'on va enlever
-                supprimer_des_vivant(vivant, segments_vivants)
+                        supprimer_des_vivant(vivant, segments_vivants)
                 #on enleve tous les segments du point_courant des vivants
-        point_courant = passer_evenement_suivant(liste_evenements, liste_intersections)
+        passer_evenement_suivant(liste_evenements, liste_intersections)
         print('liste_intersection=', liste_intersections)
         print('point_courant futur', point_courant)
     return liste_intersections
