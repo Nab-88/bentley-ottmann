@@ -68,6 +68,7 @@ def chercher_intersection(vivant, liste_evenements, liste_vivants,liste_intersec
     SORTIE: les intersections entre le segment en entrée et ses deux plus proches voisins
     et si il y en a, on les ajoute à la liste des evenements, et à segment.intersection
     """
+    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     index = liste_vivants.index(vivant)
     print('vivant', liste_vivants)
     if index != len(liste_vivants)-1 and index != 0:
@@ -131,8 +132,9 @@ def chercher_intersection_entre_voisin(vivant, liste_evenements, liste_vivants, 
     MAIS SANS LUI, car on fait comme si on l'avait enlevé.
     et si il y en a, on les ajoute à la liste des evenements, et à segment.intersection
     """
+    print('BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB')
     index = liste_vivants.index(vivant)
-    print('chercher_intersection_entre_voisin')
+
     #Rajouter des tests pour pas avoir un index list out of range
     if index != len(liste_vivants)-1 and index != 0:
         vivant_gauche = liste_vivants[index-1]
