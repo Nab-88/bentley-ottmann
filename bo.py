@@ -212,7 +212,7 @@ def bentley_ottman(liste_evenements, liste_segments, adjuster):
         print('=======nouvelle iteration======')
         print('liste_evenement=', liste_evenements)
         print('point_courant actuel', point_courant)
-        segments_courants = segment_actuels(point_courant, liste_segments)
+        segments_courants = segment_actuels(point_courant, liste_segments, adjuster)
         mis_a_jour_key(segments_vivants, point_courant)
         if est_un_debut(point_courant):
             for segment in segments_courants:

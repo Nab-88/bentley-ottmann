@@ -53,7 +53,7 @@ def key_vivant(segment, point):
         angle = None
     else:
         x_i, y_i = point_intersection.coordinates[0], point_intersection.coordinates[1]
-        x_proj, y_proj = x_i, y
+        x_proj, y_proj = x_i, y_i
         if x_proj == x_i and segment.endpoints[1].coordinates[1] > 0:
             angle = pi/2
         elif x_proj == x_i and segment.endpoints[1].coordinates[1] <= 0:
@@ -62,9 +62,9 @@ def key_vivant(segment, point):
             angle = atan((segment.endpoints[1].coordinates[1]-y_proj)/(x_proj-x_i))
     x_key = x_i
     key_actuelle = (x_key, angle)
-    #On met à jour la clé du segment
+    # On met à jour la clé du segment
     segment.key = key_actuelle
-    return(key_actuelle)
+    return key_actuelle
 
 def ajouter_aux_vivants(segment_actuel, liste_vivant):
     """
