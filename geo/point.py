@@ -24,9 +24,9 @@ class Point:
         build new point using an array of coordinates.
         """
         self.coordinates = coordinates
-        self.debut = None
-        self.milieu = None
-        self.fin = None
+        self.debut = []
+        self.milieu = []
+        self.fin = []
 
     def copy(self):
         """

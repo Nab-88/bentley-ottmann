@@ -11,8 +11,7 @@ import sys
 from geo.segment import Segment, load_segments
 from geo.tycat import tycat
 from sortedcontainers.sortedlist import SortedListWithKey
-from vivant import *
-
+import vivant as v
 
 def test(filename):
     """
@@ -23,7 +22,7 @@ def test(filename):
     #merci de completer et de decommenter les lignes suivantes
     #results = lancer bentley ottmann sur les segments et l'ajusteur
     intersections = bentley_ottman(creation_evenement(segments), segments, adjuster)
-    #tycat(segments, intersections)
+    tycat(segments, intersections)
     #print("le nombre d'intersections (= le nombre de points differents) est", ...)
     #print("le nombre de coupes dans les segments (si un point d'intersection apparait dans
     # plusieurs segments, il compte plusieurs fois) est", ...)
@@ -205,27 +204,27 @@ def bentley_ottman(liste_evenements, liste_segments, adjuster):
     En entrée la liste des segments et des evenements sont triées
     """
     liste_intersections = []
-    segments_vivants = initialiser_vivants()
+    segments_vivants = v.initialiser_vivants()
+    point_courant = None
+    segments_courants = []
     while len(liste_evenements) != 0:
-        point_courant = liste_evenements[0]
+        point_courant = liste_evenements.pop(0)
         tycat(liste_segments, point_courant)
         print('=======nouvelle iteration======')
-        print('liste_evenement=', liste_evenements)
-        print('point_courant actuel', point_courant)
         segments_courants = segment_actuels(point_courant, liste_segments, adjuster)
-        mis_a_jour_key(segments_vivants, point_courant)
+        v.mise_a_jour_key(segments_vivants, point_courant)
         if est_un_debut(point_courant):
             for segment in segments_courants:
-                clef = key_vivant(segment, point_courant)
-                vivant = Vivant(segment, clef)
-                ajouter_aux_vivants(vivant, segments_vivants)
+                clef = v.key_vivant(segment, point_courant)
+                vivant = v.Vivant(segment, clef)
+                v.ajouter_aux_vivants(vivant, segments_vivants)
             for vivant in segments_vivants:
                 # on reparcourt la liste des segments courant et on compare avec leur voisin
                 # de gauche et droite
                 # on est obligé de de le faire une fois apres les avoir tous ajoutés aux vivants
                 # sinon on risque d'en louper
                 print('liste_evenements', liste_evenements)
-                chercher_intersection(vivant, liste_evenements, segments_vivants,liste_intersections, adjuster)
+                chercher_intersection(vivant, liste_evenements, segments_vivants, liste_intersections, adjuster)
                 #on regarde si le segment actuel intersecte avec ses deux plus proches voisins et si
                 #oui on ajoute l'intersection a la liste des evenements
         elif est_une_fin(point_courant):
@@ -237,11 +236,9 @@ def bentley_ottman(liste_evenements, liste_segments, adjuster):
                         chercher_intersection_entre_voisin(vivant, liste_evenements, segments_vivants, liste_intersections, adjuster)
                 #on regarde si il existe des intersections entre les voisins de gauche et droite
                 #du segment qu'on va enlever
-                        supprimer_des_vivant(vivant, segments_vivants)
+                        v.supprimer_des_vivant(vivant, segments_vivants)
                 #on enleve tous les segments du point_courant des vivants
-        passer_evenement_suivant(liste_evenements, liste_intersections)
         print('liste_intersection=', liste_intersections)
-        print('point_courant futur', point_courant)
     return liste_intersections
 
 

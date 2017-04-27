@@ -10,6 +10,7 @@ from geo.tycat import Displayer
 from sortedcontainers.sortedlist import SortedListWithKey
 from math import atan, pi
 
+
 class Vivant:
     """
     """
@@ -17,13 +18,16 @@ class Vivant:
         self.segment = segment
         self.key = key
         self.endpoints = segment.endpoints
+
     def __str__(self):
-        return "Vivant([" + str(self.segment) + ', key :' + str(self.key)+ "])"
+        return "Vivant([" + str(self.segment) + ', key :' + str(self.key) + "])"
+
 
 def creation_vivant(segment, key):
     """
     """
     return Vivant(segment, key)
+
 
 def mise_a_jour_key(liste_vivant, point_actuel):
     """
@@ -32,7 +36,6 @@ def mise_a_jour_key(liste_vivant, point_actuel):
     """
     for vivant in liste_vivant:
         key_vivant(vivant.segment, point_actuel)
-
 
 
 def key_vivant(segment, point):
@@ -45,7 +48,7 @@ def key_vivant(segment, point):
     point_gauche = Point([-99999999999999, y])
     point_droit = Point([99999999999999, y])
     long_line = Segment([point_gauche, point_droit])
-    #creation de la ligne permettant de déterminer les x de la clef
+    # creation de la ligne permettant de déterminer les x de la clef
     point_intersection = long_line.intersection_with(segment)
 
     if point_intersection is None:
@@ -66,19 +69,21 @@ def key_vivant(segment, point):
     segment.key = key_actuelle
     return key_actuelle
 
-def ajouter_aux_vivants(segment_actuel, liste_vivant):
+
+def ajouter_aux_vivants(vivant, liste_vivant):
     """
     liste_vivants est de type SortedListWithKey
     """
-    liste_vivant.add(segment_actuel)
-    print('le segment actuel ajouté aux vivants est', segment_actuel)
+    liste_vivant.add(vivant)
+    print('le segment actuel ajouté aux vivants est', vivant.segment)
 
 
-def supprimer_des_vivant(segment_actuel, liste_vivant):
+def supprimer_des_vivant(vivant, liste_vivant):
     """
     liste_vivants est de type SortedListWithKey
     """
-    liste_vivant.remove(segment_actuel)
+    liste_vivant.remove(vivant)
+
 
 def attribut_key(vivant):
     """
