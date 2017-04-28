@@ -31,7 +31,7 @@ class Segment:
         create a segment from an array of two points.
         """
         self.endpoints = points
-        self.intersections = []
+        self.key = None
 
     def copy(self):
         """
@@ -105,6 +105,9 @@ class Segment:
         """
         distance = sum(possible_point.distance_to(p) for p in self.endpoints)
         return abs(distance - self.length()) < 0.000001
+    
+    def __eq__(self, other):
+        return (self.endpoints[0] == other.endpoints[0]) and (self.endpoints[1] == other.endpoints[1])
 
     def __str__(self):
         return "Segment([" + str(self.endpoints[0]) + ", " + \

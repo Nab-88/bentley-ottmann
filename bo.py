@@ -8,10 +8,12 @@ for each file:
     - print some statistics
 """
 import sys
+from geo.point import Point
 from geo.segment import Segment, load_segments
 from geo.tycat import tycat
 from sortedcontainers.sortedlist import SortedListWithKey
 import vivant as v
+
 
 def test(filename):
     """
@@ -19,13 +21,112 @@ def test(filename):
     """
     adjuster, segments = load_segments(filename)
     tycat(segments)
+    Events = creation_evenement(segments) # sorted list with key des evenements tries
+    Vivants = [] # contients les segments vivants
+    current = None # le point/evenement courant
+    intersections = []
+    while len(Events) != 0:
+        current = adjuster.hash_point(Events.pop(0))
+        tycat(segments, current)
+        print("Current: "+str(current))
+        # Si l'evenement est un debut de segment
+        if current.type == "debut":
+            Vivants.append(current.segment)
+            gauche, droite = voisins(current, Vivants)
+            if gauche is not None:
+                inters = adjuster.hash_point(current.segment.intersection_with(gauche))
+                if inters is not None:
+                    inters.inter.append(current.segment)
+                    inters.inter.append(gauche)
+                    Events.add(inters)
+            if droite is not None:
+                print("droite: "+str(droite))
+                inters = adjuster.hash_point(current.segment.intersection_with(droite))
+                if inters is not None:
+                    inters.inter.append(current.segment)
+                    inters.inter.append(droite)
+                    Events.add(inters)
+        # Si l'evenement est une fin de segment
+        elif current.type == "fin":
+            gauche, droite = voisins(current, Vivants)
+            Vivants.remove(current.segment)
+            if gauche is not None and droite is not None:
+                inter = adjuster.hash_point(gauche.intersection_with(droite))
+                if inter is not None:
+                    if not (inter in Events):
+                        inter.inter.append(gauche)
+                        inter.inter.append(droite)
+                        Events.add(inter)
+        # Si l'evenement est une intersection
+        else:
+            intersections.append(current)
+            current.inter[0], current.inter[1] = current.inter[1], current.inter[0]
+            gauche, droite = voisins(current, Vivants)
+            if gauche is not None:
+                inter = adjuster.hash_point(gauche.intersection_with(current.inter[0]))
+                if inter is not None:
+                    if not (inter in Events):
+                        inter.inter.append(gauche)
+                        inter.inter.append(current.inter[0])
+                        Events.add(inter)
+            if droite is not None:
+                inter = adjuster.hash_point(droite.intersection_with(current.inter[1]))
+                if inter is not None:
+                    if not (inter in Events):
+                        inter.inter.append(current.inter[1])
+                        inter.inter.append(droite)
+                        Events.add(inter)
+    print("---------------------")
+    print(intersections)
+    print("---------------------")
     #merci de completer et de decommenter les lignes suivantes
     #results = lancer bentley ottmann sur les segments et l'ajusteur
-    intersections = bentley_ottman(creation_evenement(segments), segments, adjuster)
+    # intersections = bentley_ottman(creation_evenement(segments), segments, adjuster)
     tycat(segments, intersections)
     #print("le nombre d'intersections (= le nombre de points differents) est", ...)
     #print("le nombre de coupes dans les segments (si un point d'intersection apparait dans
     # plusieurs segments, il compte plusieurs fois) est", ...)
+
+
+def voisins(point, segments):
+    """
+    renvoie le segment de gauche et celui de droite par rapport au point donné
+    (si ils existent sinon renvoie None)
+    """
+    x = point.coordinates[0]
+    y = point.coordinates[1]
+    ligne_balayage = Segment([Point([-999999999, y]), Point([999999999, y])])
+    segments_pris_en_compte = []
+    # On veut la liste triee des segments balayés
+    for seg in segments:
+        if seg.contains(point):
+            continue
+        intersection = ligne_balayage.intersection_with(seg)
+        if intersection is not None:
+            seg.key = intersection.coordinates[0]
+            segments_pris_en_compte.append(seg)
+    if len(segments_pris_en_compte) == 0:
+        return None, None
+    elif len(segments_pris_en_compte) == 1:
+        if segments_pris_en_compte[0].key <= x:
+            return segments_pris_en_compte[0], None
+        else:
+            return None, segments_pris_en_compte[0]
+    else:
+        segments_pris_en_compte.sort(key=lambda x: x.key)
+        index = 0
+        # On cherche l'index des voisins de x
+        if x <= segments_pris_en_compte[0].key:
+            return None, segments_pris_en_compte[0]
+        elif x >= segments_pris_en_compte[-1].key:
+            return segments_pris_en_compte[-1], None
+        else:
+            for i in range(len(segments_pris_en_compte)-1):
+                if (segments_pris_en_compte[i].key <= x) and (x <= segments_pris_en_compte[i+1].key):
+                    index = i
+                    break
+            # On retourne les voisins
+            return segments_pris_en_compte[index], segments_pris_en_compte[index+1]
 
 
 def getYandX(item):
@@ -47,18 +148,13 @@ def creation_evenement(liste_segment):
     liste_des_points = []
     for s in liste_segment:
         s.endpoints[0].type = "debut"
+        s.endpoints[0].segment = s
         liste_des_points.append(s.endpoints[0])
         s.endpoints[1].type = "fin"
+        s.endpoints[1].segment = s
         liste_des_points.append(s.endpoints[1])
-    liste_event_tries = SortedListWithKey(liste_des_points, key=getYandX)
-    return liste_event_tries
-
-# def detecter_voisin():
-#     """
-#     ENTREE: un segment
-#     SORTIE: la liste des segments voisins
-#     """
-#     #TODO
+    liste_events_tries = SortedListWithKey(liste_des_points, key=getYandX)
+    return liste_events_tries
 
 
 def chercher_intersection(vivant, liste_evenements, liste_vivants,liste_intersections, adjuster):
@@ -67,11 +163,9 @@ def chercher_intersection(vivant, liste_evenements, liste_vivants,liste_intersec
     SORTIE: les intersections entre le segment en entrée et ses deux plus proches voisins
     et si il y en a, on les ajoute à la liste des evenements, et à segment.intersection
     """
-    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     index = liste_vivants.index(vivant)
     print('vivant', liste_vivants)
     if index != len(liste_vivants)-1 and index != 0:
-        print('111111')
         vivant_gauche = liste_vivants[index-1]
         vivant_droite = liste_vivants[index+1]
         segment = vivant.segment
@@ -93,7 +187,6 @@ def chercher_intersection(vivant, liste_evenements, liste_vivants,liste_intersec
                 liste_evenements.add(intersection_droite)
                 liste_intersections.append(intersection_droite)
     elif index == 0 and len(liste_vivants) != 1:
-        print('22222')
         vivant_droite = liste_vivants[index+1]
         segment = vivant.segment
         voisin_droite = vivant_droite.segment
@@ -108,7 +201,6 @@ def chercher_intersection(vivant, liste_evenements, liste_vivants,liste_intersec
             segment.intersections.append(intersection_droite)
             voisin_droite.intersections.append(intersection_droite)
     elif index == len(liste_vivants)-1 and len(liste_vivants) != 1:
-        print('33333')
         vivant_gauche = liste_vivants[index-1]
         # PENSER À FAIRE PASSER LES DEUX NOUVEAUX POINTS DANS L'AJUSTEUR
         segment = vivant.segment
@@ -169,16 +261,6 @@ def est_une_fin(point_actuel):
         return True
     else:
         return False
-
-
-def passer_evenement_suivant(liste_evenements, liste_finale):
-    """
-    supprime l'évenement actuel (le premier) de la liste des evenements, l'ajoute
-    à la liste finale des points traités
-    et renvoie le nouveau_premier point de la liste des evenements
-    """
-    liste_finale = liste_evenements.pop(0)
-    return liste_finale
 
 
 def segment_actuels(point_actuel, liste_de_tous_les_segments, adjuster):
