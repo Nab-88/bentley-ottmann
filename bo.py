@@ -22,13 +22,13 @@ def test(filename):
     begin_time = time.time()
     adjuster, segments = load_segments(filename)
     tycat(segments)
-    Events = creation_evenement(segments)  # sorted list with key des evenements tries
+    Events = creation_evenement(segments, adjuster)  # sorted list with key des evenements tries
     Vivants = []  # contients les segments vivants
     current = None  # le point/evenement courant
     intersections = []
     while len(Events) != 0:
         current = adjuster.hash_point(Events.pop(0))
-        # tycat(segments, current)
+        tycat(segments, current)
         # Si l'evenement est un debut de segment
         if current.type == "debut":
             Vivants.append(current.segment)
@@ -178,7 +178,7 @@ def getYandX(item):
     return(item.coordinates[1], item.coordinates[0])
 
 
-def creation_evenement(liste_segment):
+def creation_evenement(liste_segment, adjuster):
     """
     Grâce aux SortedContainers
     ENTRÉE : Une liste de segment de la forme [Segment(Point1, Point2), ....,
@@ -193,14 +193,14 @@ def creation_evenement(liste_segment):
     for s in liste_segment:
         # determiner le debut et la fin
         if s.endpoints[0].coordinates[1] < s.endpoints[1].coordinates[1]:
-            debut, fin = s.endpoints[0], s.endpoints[1]
+            debut, fin = adjuster.hash_point(s.endpoints[0]), adjuster.hash_point(s.endpoints[1])
         elif s.endpoints[0].coordinates[1] > s.endpoints[1].coordinates[1]:
-            debut, fin = s.endpoints[1], s.endpoints[0]
+            debut, fin = adjuster.hash_point(s.endpoints[1]), adjuster.hash_point(s.endpoints[0])
         else:
             if s.endpoints[0].coordinates[0] < s.endpoints[1].coordinates[0]:
-                debut, fin = s.endpoints[0], s.endpoints[1]
+                debut, fin = adjuster.hash_point(s.endpoints[0]), adjuster.hash_point(s.endpoints[1])
             else:
-                debut, fin = s.endpoints[1], s.endpoints[0]
+                debut, fin = adjuster.hash_point(s.endpoints[1]), adjuster.hash_point(s.endpoints[0])
         # affecter les attributs et ajouter a la liste triee
         debut.type = "debut"
         debut.segment = s
