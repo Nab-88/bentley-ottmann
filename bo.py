@@ -24,42 +24,53 @@ def test(filename):
     Vivants = []  # contients les segments vivants
     current = None  # le point/evenement courant
     intersections = []
-    decalage = 0
     while len(Events) != 0:
         current = adjuster.hash_point(Events.pop(0))
-        tycat(segments, current)
+        # tycat(segments, current)
         # Si l'evenement est un debut de segment
         if current.type == "debut":
             Vivants.append(current.segment)
             gauche, droite = voisins(current, Vivants)
             if gauche is not None:
-                inters = adjuster.hash_point(current.segment.intersection_with(gauche))
-                if inters is not None:
-                    inters.segment = gauche # !!!!!!!!!!!!!!!!
-                    inters.inter.append(current.segment)
-                    inters.inter.append(gauche)
-                    Events.add(inters)
+                if current.segment.intersection_with(gauche) is not None:
+                    inters = adjuster.hash_point(current.segment.intersection_with(gauche))
+                    if (not (inters in Events)) and pas_une_extremite(inters, segments):
+                        inters.segment = current.segment
+                        inters.inter.append(current.segment)
+                        inters.inter.append(gauche)
+                        Events.add(inters)
+                        # ajout de l'intersection pour l'autre segment
+                        inters.segment = gauche
+                        inters.inter[0], inters.inter[1] = inters.inter[1], inters.inter[0]
+                        Events.add(inters)
             if droite is not None:
-                inters = adjuster.hash_point(current.segment.intersection_with(droite))
-                if inters is not None:
-                    inters.segment = droite
-                    inters.inter.append(current.segment)
-                    inters.inter.append(droite)
-                    Events.add(inters)
+                if current.segment.intersection_with(droite) is not None:
+                    inters = adjuster.hash_point(current.segment.intersection_with(droite))
+                    if (not (inters in Events)) and pas_une_extremite(inters, segments):
+                        inters.segment = current.segment
+                        inters.inter.append(current.segment)
+                        inters.inter.append(droite)
+                        Events.add(inters)
+                        # 2e
+                        inters.segment = droite
+                        inters.inter[0], inters.inter[1] = inters.inter[1], inters.inter[0]
+                        Events.add(inters)
         # Si l'evenement est une fin de segment
         elif current.type == "fin":
             gauche, droite = voisins(current, Vivants)
             Vivants.remove(current.segment)
             if gauche is not None and droite is not None:
-                inter = adjuster.hash_point(gauche.intersection_with(droite))
-                if inter is not None:
+                if gauche.intersection_with(droite) is not None:
+                    inter = adjuster.hash_point(gauche.intersection_with(droite))
                     if (not (inter in Events)) and pas_une_extremite(inter, segments):
                         inter.segment = gauche
                         inter.inter.append(gauche)
                         inter.inter.append(droite)
                         Events.add(inter)
-                    else:
-                        decalage += 1
+                        # 2e
+                        inter.segment = droite
+                        inter.inter[0], inter.inter[1] = inter.inter[1], inter.inter[0]
+                        Events.add(inter)
         # Si l'evenement est une intersection
         else:
             intersections.append(current)
@@ -67,30 +78,35 @@ def test(filename):
             current.segment = current.inter[0]
             gauche, droite = voisins(current, Vivants)
             if gauche is not None:
-                inter = adjuster.hash_point(gauche.intersection_with(current.inter[0]))
-                if inter is not None:
+                if gauche.intersection_with(current.inter[0]) is not None:
+                    inter = adjuster.hash_point(gauche.intersection_with(current.inter[0]))
                     if not (inter in Events):
                         if pas_une_extremite(inter, segments):
                             inter.segment = gauche
                             inter.inter.append(gauche)
                             inter.inter.append(current.inter[0])
                             Events.add(inter)
-                    else:
-                        decalage += 1
+                            # 2e
+                            inter.segment = current.inter[0]
+                            inter.inter[0], inter.inter[1] = inter.inter[1], inter.inter[0]
+                            Events.add(inter)
             if droite is not None:
-                inter = adjuster.hash_point(droite.intersection_with(current.inter[1]))
-                if inter is not None:
+                if droite.intersection_with(current.inter[1]) is not None:
+                    inter = adjuster.hash_point(droite.intersection_with(current.inter[1]))
                     if not (inter in Events):
                         if pas_une_extremite(inter, segments):
-                            inter.segment = droite
+                            inter.segment = current.inter[1]
                             inter.inter.append(current.inter[1])
                             inter.inter.append(droite)
                             Events.add(inter)
-                    else:
-                        decalage += 1
+                            # 2e
+                            inter.segment = droite
+                            inter.inter[0], inter.inter[1] = inter.inter[1], inter.inter[0]
+                            Events.add(inter)
+    intersections = list(set(intersections))
     tycat(segments, intersections)
     print("le nombre d'intersections (= le nombre de points differents) est : ", len(intersections))
-    print("le nombre de coupes dans les segments (si un point d'intersection apparait dans plusieurs segments, il compte plusieurs fois) est : ", len(intersections)+decalage)
+    # print("le nombre de coupes dans les segments (si un point d'intersection apparait dans plusieurs segments, il compte plusieurs fois) est : ", len(intersections)+decalage)
 
 
 def pas_une_extremite(point, segments):
