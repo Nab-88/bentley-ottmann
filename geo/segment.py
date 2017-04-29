@@ -89,7 +89,7 @@ class Segment:
         # intersection = start of other + beta * direction of other
         directions = [s.endpoints[1] - s.endpoints[0] for s in (self, other)]
         denominator = directions[0].cross_product(directions[1])
-        if abs(denominator) < 0.000001:
+        if abs(denominator) < 0.0000000001:
             # almost parallel lines
             return
         start_diff = other.endpoints[0] - self.endpoints[0]
@@ -104,7 +104,7 @@ class Segment:
         you might get wrong results for points extremely near endpoints.
         """
         distance = sum(possible_point.distance_to(p) for p in self.endpoints)
-        return abs(distance - self.length()) < 0.000001
+        return abs(distance - self.length()) < 0.0000000001
     
     def __eq__(self, other):
         return (self.endpoints[0] == other.endpoints[0]) and (self.endpoints[1] == other.endpoints[1])
