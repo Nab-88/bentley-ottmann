@@ -154,7 +154,7 @@ def voisins(point, segments, a_enlever):
     """
     x = point.coordinates[0]
     y = point.coordinates[1]
-    ligne_balayage = Segment([Point([-999999999, y]), Point([999999999, y])])
+    ligne_balayage = Segment([Point([-999999, y]), Point([999999, y])])
     segments_pris_en_compte = []
     nb_gauche = 0
     nb_droite = 0
@@ -186,18 +186,18 @@ def voisins(point, segments, a_enlever):
             segm = segments_pris_en_compte[0]
             nb_droite += 1
             for i in range(1, len(segments_pris_en_compte)):
-                if segm == segments_pris_en_compte[i]:
+                if segm.key == segments_pris_en_compte[i].key:
                     nb_droite += 1
-                if segments_pris_en_compte[i] != segm:
+                if segments_pris_en_compte[i].key != segm.key:
                     break
             return None, segments_pris_en_compte[0], nb_gauche, nb_droite
         elif x >= segments_pris_en_compte[-1].key:
             segm = segments_pris_en_compte[-1]
             nb_gauche += 1
             for i in range(len(segments_pris_en_compte) - 2, -1, -1):
-                if segments_pris_en_compte[i] == segm:
+                if segments_pris_en_compte[i].key == segm.key:
                     nb_gauche += 1
-                if segments_pris_en_compte[i] != segm:
+                if segments_pris_en_compte[i].key != segm.key:
                     break
             return segments_pris_en_compte[-1], None, nb_gauche, nb_droite
         else:
@@ -210,14 +210,14 @@ def voisins(point, segments, a_enlever):
             nb_gauche += 1
             nb_droite += 1
             for i in range(index-1, -1, -1):
-                if segments_pris_en_compte[i] == segm_g:
+                if segments_pris_en_compte[i].key == segm_g.key:
                     nb_gauche += 1
-                if segments_pris_en_compte[i] != segm_g:
+                if segments_pris_en_compte[i].key != segm_g.key:
                     break
             for i in range(index+1, len(segments_pris_en_compte)):
-                if segments_pris_en_compte[i] == segm_d:
+                if segments_pris_en_compte[i].key == segm_d.key:
                     nb_droite += 1
-                if segments_pris_en_compte[i] != segm_d:
+                if segments_pris_en_compte[i].key != segm_d.key:
                     break
             # On retourne les voisins
             return segments_pris_en_compte[index], segments_pris_en_compte[index+1], nb_gauche, nb_droite

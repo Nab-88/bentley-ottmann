@@ -69,8 +69,8 @@ class Point:
         """
         strict equality operator
         """
-        return (abs(self.coordinates[0] - other.coordinates[0]) < 0.000001)\
-            and (abs(self.coordinates[1] - other.coordinates[1]) < 0.000001)
+        return (self.coordinates[0] == other.coordinates[0])\
+            and (self.coordinates[1] == other.coordinates[1])
 
     def __hash__(self):
         return hash(tuple(self.coordinates))

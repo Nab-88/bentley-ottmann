@@ -5,7 +5,7 @@ adjust points coordinates in O(1).
 from geo.point import Point
 
 # how much to we adjust ?
-PRECISION = 6
+PRECISION = 10
 PRECISION_FORMAT = "{{0:.{}f}}".format(PRECISION)
 
 def _coordinate_key(coordinate, wanted_precision=PRECISION):
