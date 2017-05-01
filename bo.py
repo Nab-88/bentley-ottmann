@@ -24,15 +24,18 @@ def test(filename):
     Events = creation_evenement(segments, adjuster)  # sorted list with key des evenements tries
     Vivants = []  # contients les segments vivants
     current = None  # le point/evenement courant
-    intersections = []
+    intersections = [] # contient les intersections
     while len(Events) != 0:
         current = adjuster.hash_point(Events.pop(0))
-        # tycat(segments, current)
-        a_enlever = []
+        a_enlever = [] # va servir a considerer TOUS les voisins(intersection)
         # Si l'evenement est un debut de segment
         if current.type == "debut":
+            # on demarre le segment
             Vivants.append(current.segment)
+            # on cherche les voisins
             gauche, droite, nb_g, nb_d = voisins(current, Vivants, a_enlever)
+            # on traite tous les voisins: il y en a plusieurs lorsque
+            # le voisin appartient a plusieurs segments
             for _ in range(nb_g):
                 if gauche is not None:
                     if current.segment.intersection_with(gauche) is not None:
@@ -59,7 +62,7 @@ def test(filename):
                                 inters.inter.append(current.segment)
                                 inters.inter.append(droite)
                                 Events.add(inters)
-                                # 2e
+                                # ajout de l'intersection pour l'autre segment
                                 inters.segment = droite
                                 inters.inter[0], inters.inter[1] = inters.inter[1], inters.inter[0]
                                 Events.add(inters)
@@ -67,8 +70,10 @@ def test(filename):
                     gauche, droite, tmp1, tmp2 = voisins(current, Vivants, a_enlever)
         # Si l'evenement est une fin de segment
         elif current.type == "fin":
+            # on cherche les voisins avant de terminer le segment
             gauche, droite, nb_g, nb_d = voisins(current, Vivants, a_enlever)
             Vivants.remove(current.segment)
+            # on considere tous les voisins
             for _ in range(min(nb_g, nb_d)):
                 if gauche is not None and droite is not None:
                     if gauche.intersection_with(droite) is not None:
@@ -79,7 +84,7 @@ def test(filename):
                                 inter.inter.append(gauche)
                                 inter.inter.append(droite)
                                 Events.add(inter)
-                                # 2e
+                                # ajout pour l'autre segment
                                 inter.segment = droite
                                 inter.inter[0], inter.inter[1] = inter.inter[1], inter.inter[0]
                                 Events.add(inter)
@@ -89,9 +94,12 @@ def test(filename):
         # Si l'evenement est une intersection
         else:
             intersections.append(current)
+            # on considere les "bons" segments pour les intersections avec
+            # les voisins
             current.inter[0], current.inter[1] = current.inter[1], current.inter[0]
             current.segment = current.inter[0]
             gauche, droite, nb_g, nb_d = voisins(current, Vivants, a_enlever)
+            # on considere tous les voisins
             for _ in range(nb_g):
                 if gauche is not None:
                     if gauche.intersection_with(current.inter[0]) is not None:
@@ -103,7 +111,7 @@ def test(filename):
                                     inter.inter.append(gauche)
                                     inter.inter.append(current.inter[0])
                                     Events.add(inter)
-                                    # 2e
+                                    # ajout pour l'autre segment
                                     inter.segment = current.inter[0]
                                     inter.inter[0], inter.inter[1] = inter.inter[1], inter.inter[0]
                                     Events.add(inter)
@@ -120,7 +128,7 @@ def test(filename):
                                     inter.inter.append(current.inter[1])
                                     inter.inter.append(droite)
                                     Events.add(inter)
-                                    # 2e
+                                    # ajout pour l'autre segment
                                     inter.segment = droite
                                     inter.inter[0], inter.inter[1] = inter.inter[1], inter.inter[0]
                                     Events.add(inter)
@@ -157,7 +165,8 @@ def voisins(point, segments, a_enlever):
     segments_pris_en_compte = []
     nb_gauche = 0
     nb_droite = 0
-    # On veut la liste triee des segments balayés
+    # On veut la liste triee des segments balayés sauf ceux de a_enlever
+    # et celui du point considere
     for seg in segments:
         if len(a_enlever) != 0:
             if seg in a_enlever:
@@ -168,8 +177,11 @@ def voisins(point, segments, a_enlever):
         if intersection is not None:
             seg.key = intersection.coordinates[0]
             segments_pris_en_compte.append(seg)
+    # on va determiner les voisins et leur nombre
+    # Si il n'y a pas de voisin
     if len(segments_pris_en_compte) == 0:
         return None, None, nb_gauche, nb_droite
+    # Si il y en a un seul
     elif len(segments_pris_en_compte) == 1:
         if segments_pris_en_compte[0].key <= x:
             nb_gauche += 1
@@ -177,10 +189,13 @@ def voisins(point, segments, a_enlever):
         else:
             nb_droite += 1
             return None, segments_pris_en_compte[0], nb_gauche, nb_droite
+    # si il y en a plusieurs
     else:
+        # on les trie en fonction de la cle 'abscisse'
         segments_pris_en_compte.sort(key=lambda x: x.key)
         index = 0
         # On cherche l'index des voisins de x
+        # si le segment actuel est le plus a gauche
         if x <= segments_pris_en_compte[0].key:
             segm = segments_pris_en_compte[0]
             nb_droite += 1
@@ -190,6 +205,7 @@ def voisins(point, segments, a_enlever):
                 if segments_pris_en_compte[i].key != segm.key:
                     break
             return None, segments_pris_en_compte[0], nb_gauche, nb_droite
+        # si le segment actuel est le plus a droite
         elif x >= segments_pris_en_compte[-1].key:
             segm = segments_pris_en_compte[-1]
             nb_gauche += 1
@@ -199,6 +215,7 @@ def voisins(point, segments, a_enlever):
                 if segments_pris_en_compte[i].key != segm.key:
                     break
             return segments_pris_en_compte[-1], None, nb_gauche, nb_droite
+        # si le segment actuel est quelque part au milieu
         else:
             for i in range(len(segments_pris_en_compte)-1):
                 if (segments_pris_en_compte[i].key <= x) and (x <= segments_pris_en_compte[i+1].key):
@@ -218,13 +235,12 @@ def voisins(point, segments, a_enlever):
                     nb_droite += 1
                 if segments_pris_en_compte[i].key != segm_d.key:
                     break
-            # On retourne les voisins
             return segments_pris_en_compte[index], segments_pris_en_compte[index+1], nb_gauche, nb_droite
 
 
 def getYandX(item):
     """
-    fonction utilisé pour récupérer le Y du point pour la fonction sorted()
+    fonction utilisé pour récupérer le Y et le X du point
     """
     return(item.coordinates[1], item.coordinates[0])
 
@@ -281,6 +297,7 @@ def main():
     print("==============================================")
     print("Voici les nb d'intersections respectifs: ", liste_inter)
     print("Voici les temps respectifs: ", temps)
+
 
 if __name__ == '__main__':
     main()

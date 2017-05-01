@@ -24,9 +24,9 @@ class Point:
         build new point using an array of coordinates.
         """
         self.coordinates = coordinates
-        self.type = None
-        self.segment = None
-        self.inter = []
+        self.type = None # debut ? fin ?
+        self.segment = None # le segment considere/actuel
+        self.inter = [] # les 2 segments qui l'intersectent
 
     def copy(self):
         """
