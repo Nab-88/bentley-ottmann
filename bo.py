@@ -19,7 +19,6 @@ def test(filename):
     """
     run bentley ottmann
     """
-    begin_time = time.time()
     adjuster, segments = load_segments(filename)
     tycat(segments)
     Events = creation_evenement(segments, adjuster)  # sorted list with key des evenements tries
@@ -130,7 +129,7 @@ def test(filename):
     intersections = list(set(intersections))
     tycat(segments, intersections)
     print("le nombre d'intersections (= le nombre de points differents) est : ", len(intersections))
-    print("temps : ", time.time() - begin_time, "s")
+    return intersections
     # print("le nombre de coupes dans les segments (si un point d'intersection apparait dans plusieurs segments, il compte plusieurs fois) est : ", len(intersections)+decalage)
 
 
@@ -268,8 +267,20 @@ def main():
     """
     launch test on each file.
     """
+    temps = []
+    liste_inter = []
     for filename in sys.argv[1:]:
-        test(filename)
+        print("Pour le test ", filename)
+        debut = time.time()
+        intersections = test(filename)
+        liste_inter.append(len(intersections))
+        tps = time.time() - debut
+        temps.append(tps)
+        print("Temps d'exécution: ", tps, " s")
+        print("-----------------------------")
+    print("==============================================")
+    print("Voici les nb d'intersections respectifs: ", liste_inter)
+    print("Voici les temps respectifs: ", temps)
 
 if __name__ == '__main__':
     main()
